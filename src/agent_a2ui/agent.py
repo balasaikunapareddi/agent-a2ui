@@ -105,7 +105,12 @@ class A2UIBookingAgent:
 
         # Conversation state (model-visible parts contain no PII).
         self._history: list[dict[str, Any]] = [
-            {"role": "system", "content": BOOKING_AGENT_SYSTEM_PROMPT}
+            {
+                "role": "system",
+                "content": BOOKING_AGENT_SYSTEM_PROMPT
+                + f"\n\nToday's date is {self._today.isoformat()} "
+                f"({self._today.strftime('%A')}).",
+            }
         ]
         self._confirmed = False  # set ONLY by a bookingConfirmed action
         self._surface_counter = 0
