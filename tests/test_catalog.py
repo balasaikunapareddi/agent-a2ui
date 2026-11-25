@@ -104,3 +104,24 @@ def test_full_surface_accepted(catalog):
             },
         ]
     )
+
+
+def test_missing_component_field_error_names_the_field():
+    """Regression: a live model emitted {"type": "Column"} instead of
+    {"component": "Column"} and the old SDK error ('Unrecognized component
+    type None') never told it which key was wrong, so it retried the same
+    shape until the turn died. The error must now name the field."""
+    catalog = ClinicCatalog()
+    with pytest.raises(CatalogValidationError) as excinfo:
+        catalog.validate_component({"id": "root", "type": "Column", "children": []})
+    message = str(excinfo.value)
+    assert '"component"' in message
+    assert '"type"' in message
+
+
+def test_system_prompt_documents_component_field_shape():
+    """The wire shape must be stated where the model can read it."""
+    from agent_a2ui.prompts import BOOKING_AGENT_SYSTEM_PROMPT
+
+    assert '"component": "Column"' in BOOKING_AGENT_SYSTEM_PROMPT
+    assert '"component": "SlotPicker"' in BOOKING_AGENT_SYSTEM_PROMPT

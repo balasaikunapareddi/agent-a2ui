@@ -163,7 +163,10 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "emit_surface",
             "description": (
-                "Send an A2UI surface to the patient. Components must come "
+                "Send an A2UI surface to the patient. Each component object "
+                "names its type in a 'component' field (NOT 'type'), e.g. "
+                "{\"id\": \"root\", \"component\": \"Column\", \"children\": "
+                "[...]}. Components must come "
                 "from the clinic catalog (Column, Text, SlotPicker, "
                 "IntakeForm, ApprovalCard, InfoCard, AvailabilityChart) and "
                 "one component must have id 'root'. The surface is validated "

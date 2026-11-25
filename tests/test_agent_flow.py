@@ -168,3 +168,20 @@ def test_booked_slot_disappears_from_availability():
     )
     remaining = agent.calendar.check_availability(TODAY, TODAY + timedelta(days=7))
     assert slot.slot_id not in [s.slot_id for s in remaining]
+
+
+def test_history_never_stores_empty_tool_calls():
+    """Regression: an assistant message with "tool_calls": [] in history
+    makes OpenAI reject the next request (400: empty array, minimum
+    length 1). Gemini tolerates it, so this only surfaced live on
+    gpt-4o-mini. Whatever the model fn returns, stored history must not
+    carry an empty tool_calls array."""
+    from agent_a2ui.agent import A2UIBookingAgent
+
+    def text_only_model(messages, tools):
+        return {"role": "assistant", "content": "Hello.", "tool_calls": []}
+
+    agent = A2UIBookingAgent(patient=PATIENT, today=TODAY, model_fn=text_only_model)
+    agent.handle_user_text("hi")
+    for message in agent._history:
+        assert message.get("tool_calls") != []

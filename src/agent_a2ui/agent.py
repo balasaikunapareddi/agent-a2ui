@@ -69,7 +69,13 @@ def litellm_model(messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -
                 "function": {"name": tc.function.name, "arguments": tc.function.arguments},
             }
         )
-    return {"role": "assistant", "content": message.content, "tool_calls": tool_calls}
+    result: dict[str, Any] = {"role": "assistant", "content": message.content}
+    # Only include tool_calls when non-empty: OpenAI rejects an assistant
+    # message whose tool_calls is an empty array (Gemini tolerates it, so
+    # this only surfaced when the history was replayed to OpenAI).
+    if tool_calls:
+        result["tool_calls"] = tool_calls
+    return result
 
 
 @dataclass
@@ -148,6 +154,10 @@ class A2UIBookingAgent:
         result = TurnResult()
         for _ in range(MAX_TOOL_ROUNDS):
             assistant = self._model_fn(self._history, TOOL_DEFINITIONS)
+            if not assistant.get("tool_calls"):
+                # Never store an empty tool_calls array in history —
+                # OpenAI rejects it when the history is replayed.
+                assistant.pop("tool_calls", None)
             self._history.append(assistant)
             if assistant.get("content"):
                 result.text = assistant["content"]

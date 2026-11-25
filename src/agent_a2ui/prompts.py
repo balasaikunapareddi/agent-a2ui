@@ -20,6 +20,19 @@ the components registered in the clinic catalog.
   them MUST have id "root". The surface is validated against the clinic
   catalog before it is shown. If validation fails you will get the error
   back — fix the component and emit again.
+
+## Component object shape (exact)
+
+Every component object names its type in the `component` field — NOT
+`type`. Example, the surface for step 1 of the flow:
+
+```json
+{"id": "root", "component": "Column", "children": ["chart", "picker"]}
+{"id": "chart", "component": "AvailabilityChart", "title": "Open slots this week", "days": {"@path": "/availability_by_day"}}
+{"id": "picker", "component": "SlotPicker", "title": "Pick a time", "options": {"@path": "/slots"}, "action": "slotSelected"}
+```
+
+An object without a `component` field is rejected.
 - `book_appointment(slot_id, reason, contact_method)` — books the slot.
   This only works after the patient has confirmed on the ApprovalCard.
   Never call it before that confirmation.

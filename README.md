@@ -171,11 +171,19 @@ GEMINI_API_KEY=... .venv/bin/python -m agent_a2ui serve
 
 ## Limitations
 
-- Live verification status: the offline suite (44 tests) passes with no API
-  key. The live script (`scripts/live_test.py`) is ready but, at build
-  time, the Gemini free-tier daily quota (500 requests/day) was exhausted
-  (HTTP 429 `RESOURCE_EXHAUSTED`), so the live run is pending a quota
-  reset. It will be re-run and the result recorded here.
+- Live verification status: the offline suite (47 tests) passes with no API
+  key. The live run (`scripts/live_test.py`) passed end to end on
+  2026-11-25 on two real models — Gemini (`gemini-3.5-flash-lite`) and
+  gpt-4o-mini — full flow (SlotPicker → IntakeForm → ApprovalCard →
+  InfoCard), one booking created only after confirmation, and no patient
+  PII in any model-emitted message. Getting there found two real
+  portability bugs that the Gemini-only attempts had hidden: the system
+  prompt never stated that a component object names its type in the
+  `component` field (gpt-4o-mini guessed `type`, and the old validation
+  error never said which key was wrong — both fixed), and stored history
+  carried an empty `tool_calls` array that OpenAI rejects with a 400
+  (Gemini tolerates it). Earlier live attempts (2026-11-23) failed on
+  Gemini 503s and quota exhaustion before either bug could surface.
 - The demo patient is fictional; the calendar is synthetic. No real
   healthcare data anywhere.
 - Streaming/progressive rendering (a core A2UI feature) is not exercised —

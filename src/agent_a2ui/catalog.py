@@ -154,6 +154,18 @@ class ClinicCatalog:
         Raises CatalogValidationError with a human-readable message when
         the component type is not registered or its props are invalid.
         """
+        if "component" not in component:
+            hint = (
+                'component objects must name their type in the "component" '
+                'field, e.g. {"id": "root", "component": "Column", '
+                '"children": ["..."]}'
+            )
+            if "type" in component:
+                hint += ' — you used "type" instead of "component"'
+            raise CatalogValidationError(
+                f"component {component.get('id')!r} has no \"component\" "
+                f"field: {hint}"
+            )
         try:
             self._validator.validate_component(component)
         except A2uiValidationError as exc:
